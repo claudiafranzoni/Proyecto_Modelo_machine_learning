@@ -1,6 +1,6 @@
 ![Portada del proyecto](data/imagen_readmeML.png)
 
-# Análisis Exploratorio y Segmentación de Clientes · Persona A
+# Análisis Exploratorio y Segmentación de Clientes ·
 
 > Parte del proyecto correspondiente al **análisis exploratorio de datos (EDA)** y a la **segmentación de clientes** (aprendizaje no supervisado). Rama: `feature/eda`.
 
