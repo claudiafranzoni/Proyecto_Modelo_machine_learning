@@ -84,3 +84,77 @@ La conversión varía **del 23 % al 6 %** según el perfil (casi ×4): existe se
 ---
 
 *Análisis realizado sobre el conjunto de entrenamiento (partición estratificada 80/20). El EDA describe sobre el conjunto completo; las transformaciones que ajustan parámetros se aplican solo sobre train.*
+
+## Feature Engineering
+
+### Eliminación de variables con fuga de información
+- `duration` se elimina completamente.  
+  Su valor depende del resultado de la llamada → **no puede usarse para predecir antes de llamar**.
+
+### Recodificación de variables
+- `pdays = -1` indica *ausencia de contacto previo*.  
+- Se transforma en una variable binaria:  
+  **0 = sin contacto previo**, **1 = contacto previo**.
+
+### Recodificación de categorías
+- `poutcome = unknown` se recodifica como `no_previous_contact`.  
+- Todos los registros con `unknown` en `poutcome` coinciden con `pdays = -1`, por lo que ambas variables representan la misma condición: **ausencia de contacto previo**.
+
+### Imputación de valores faltantes reales
+- `job = unknown` aparece en solo **0.6%** de los registros.  
+- Se imputa con la **moda del conjunto de entrenamiento** para evitar distorsión.
+
+### Codificación de variables binarias
+- `default`, `housing`, `loan` → se convierten a **0/1**.
+
+### Conservación de categorías válidas
+- `education` y `contact` conservan la categoría `unknown`, dado que su presencia en el dataset es del **4.1%** y **28.8%** respectivamente. Imputarlas podría introducir ruido, modificar la estructura real de los datos y reducir la capacidad del modelo para capturar patrones asociados a estos valores.
+
+---
+
+## Preparación del modelado
+
+### Separación Train/Test
+Se realiza un **split estratificado** para preservar la proporción de clases.
+
+### Identificación de tipos de variables
+- Variables numéricas  
+- Variables categóricas  
+- Variables binarias ya transformadas  
+
+---
+
+## Pipelines para modelos
+
+Se construyen **3 pipelines independientes**, optimizados para cada familia de modelos:
+
+### Modelos que requieren transformación de sesgo + escalado + OneHot
+- Logistic Regression  
+- KNN  
+- SVM  
+
+Incluyen:
+- Transformación de sesgo (`log1p` o `cbrt`)  
+- `StandardScaler` para numéricas  
+- `OneHotEncoder` para categóricas  
+
+### Modelos que no requieren escalado pero sí OneHot
+- DecisionTree  
+- RandomForest  
+- XGBoost  
+- LightGBM  
+
+Incluyen:
+- Numéricas en *passthrough*  
+- `OneHotEncoder` para categóricas  
+
+### CatBoost
+- No requiere escalado  
+- No requiere OneHot  
+- Maneja categóricas de forma nativa  
+- Gestiona internamente el desbalanceo
+
+
+
+---
+
