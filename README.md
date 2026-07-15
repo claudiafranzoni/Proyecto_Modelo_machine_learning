@@ -183,6 +183,73 @@ El objetivo del proyecto es predecir qué clientes contratan el producto, para p
 
 ---
 
+## Estructura del repositorio
+
+```
+├── src/
+│   ├── data_sample/    # Archivos de datos de muestra (máx. 100MB)
+│   ├── img/            # Imágenes utilizadas en el proyecto
+│   ├── models/         # Modelos guardados en formato pickle o joblib
+│   ├── notebooks/      # Notebooks de desarrollo y pruebas
+│   ├── utils/          # Módulos y funciones auxiliares
+├── main.ipynb          # Notebook final del pipeline de ML
+├── Presentacion.pdf    # Documento soporte de la exposición
+├── README.md           # Fichero README resumen del proyecto
+├── requirements.txt    # Fichero con las dependencias usadas en el proyecto y reproducible
+```
+
+---
+
+## Tecnologías utilizadas
+
+- **Python 3.10+**
+- **pandas** y **numpy** — análisis y manipulación de datos
+- **scikit-learn** — modelos base, pipelines, métricas y validación cruzada
+- **Modelos de Gradient Boosting utilizados:**
+  - **XGBoost**
+  - **LightGBM**
+  - **CatBoost**
+- **Modelos clásicos utilizados en la experimentación:**
+  - Logistic Regression  
+  - K-Nearest Neighbors (KNN)  
+  - Support Vector Machine (SVM)  
+  - Decision Tree  
+  - Random Forest  
+- **GridSearchCV** y **RandomizedSearchCV** — optimización de hiperparámetros
+- **Matplotlib** y **Seaborn** — visualización de resultados
+- **Jupyter Notebook** — desarrollo y análisis exploratorio
+- **Git + GitHub Desktop** — control de versiones
+- **Visual Studio Code (VS Code)** — entorno de desarrollo
+
+
+--- 
+
+## Instrucciones de reprodución
+
+Para ejecutar el proyecto y reproducir los resultados del modelo, sigue los pasos indicados a continuación:
+
+git clone https://github.com/claudiafranzoni/Proyecto_Modelo_machine_learning
+cd Proyecto_Modelo_machine_learning
+
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+jupyter notebook notebooks/main.ipynb
+
+# Cargar modelo final
+import joblib
+modelo = joblib.load("models/catboost_optimizado.pkl")
+
+---
+
+
 # Análisis Exploratorio y Segmentación de Clientes
 
 ## Contenido de esta parte

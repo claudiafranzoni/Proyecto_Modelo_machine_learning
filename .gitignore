@@ -1,0 +1,22 @@
+# CatBoost logs
+catboost_info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# Modelos
+*.pkl
+*.joblib
+
+# Datos
+data/
+*.csv
+*.xlsx
+
+# Entornos
+.env
+venv/
