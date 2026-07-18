@@ -90,7 +90,6 @@ modelo = joblib.load("models/catboost_optimizado.pkl")
 |---|---|
 | `EDA_dirigido_PersonaA.ipynb` | EDA dirigido: calidad del dato, variable objetivo, análisis univariante y relación con el objetivo. |
 | `Modulo_Segmentacion_Clientes.ipynb` | Segmentación con K-Means: elección de algoritmo y de *k*, perfilado de segmentos y guardado de artefactos. |
-| `Memoria_Tecnica_EDA.docx` | Memoria técnica del EDA (documento formal). |
 | `models/scaler_segmentacion.pkl` | Escalador ajustado sobre *train* para la segmentación. |
 | `models/kmeans_segmentacion.pkl` | Modelo de clustering (K-Means, k=4) entrenado. |
 
