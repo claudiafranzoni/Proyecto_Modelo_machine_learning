@@ -304,6 +304,40 @@ El modelo final cumple con los más altos estándares de ingeniería de datos: s
 
 ---
 
+# 9. Evaluación del Umbral  
+
+### Cómo adaptar el comportamiento del modelo CatBoost a los objetivos del negocio bancario
+
+En modelos de clasificación binaria, el umbral de decisión determina a partir de qué probabilidad consideramos que un cliente **sí contrataría** el producto. Aunque el valor por defecto suele ser **0.50**, en campañas bancarias este umbral tiene un impacto directo en el número de llamadas, los clientes captados y los recursos necesarios. Por eso, evaluar distintos umbrales permite ajustar el modelo a la estrategia comercial del banco.
+
+## Efecto de modificar el umbral
+
+- **Umbral bajo (≈ 0.30)**  
+  - El modelo se vuelve más agresivo.  
+  - Se identifican más clientes que sí contratarían (menos falsos negativos).  
+  - Aumentan las llamadas y el coste operativo.  
+  - Ideal para **maximizar captación**.
+
+- **Umbral estándar o alto (≈ 0.50 – 0.70)**  
+  - El modelo se vuelve más conservador.  
+  - Se reducen las llamadas innecesarias (menos falsos positivos).  
+  - Se pierden más clientes que sí contratarían.  
+  - Adecuado para **optimizar eficiencia** y reducir carga del equipo.
+
+- **Umbral adaptado al presupuesto y capacidad del equipo**  
+  - Permite equilibrar **tiempo, coste y clientes captados**.  
+  - Útil cuando el número de agentes es limitado o la campaña debe ajustarse a un presupuesto concreto.
+
+## Conclusión general
+
+A medida que subimos el umbral, el modelo exige mayor probabilidad para clasificar a un cliente como “sí”. Esto reduce llamadas innecesarias, pero también aumenta los clientes perdidos.  
+
+Por tanto:
+- Umbral alto = menos esfuerzo comercial, más eficiencia, pero más oportunidades perdidas.  
+- Umbral bajo = más esfuerzo comercial, más captación, pero mayor coste operativo.
+
+El ajuste del umbral convierte el modelo CatBoost en una herramienta flexible que puede adaptarse a cualquier estrategia del banco: vender más, ahorrar recursos o encontrar un punto intermedio.
+
 
 
 ## Autores
