@@ -399,16 +399,79 @@ Incluyen:
 
 # 6. Modelado
 
-- Métricas
+El objetivo de esta fase ha sido desarrollar un modelo de clasificación binaria supervisada capaz de estimar la probabilidad de que un cliente contrate un depósito a plazo (`y` ∈ {no, yes}). El propósito fundamental de negocio es **priorizar los contactos del *call center* antes de realizar la llamada**, optimizando los costes y aumentando el ratio de conversión.
+
+Para garantizar la máxima rigurosidad y robustez del modelo, la estrategia se fundamentó en tres pilares:
+
+###  1. Prevención del *Data Leakage* (Fuga de Datos)
+* **Exclusiones de negocio:** Se eliminó la variable predictiva `duration` (duración de la llamada). Aunque presenta una correlación alta con la contratación ($r \approx 0.39$), este dato solo se conoce *después* de finalizada la llamada. Incluirlo falsearía las métricas e invalidaría el objetivo de priorización previa.
+* **Separación de particiones:** La división de datos en conjuntos de entrenamiento (80%) y prueba (20%) —este último compuesto por **9,043 registros**— se realizó de forma previa a cualquier transformación. Todas las imputaciones, escalados y codificaciones (*One-Hot Encoding*) se ajustaron y aplicaron utilizando un entorno de **Pipeline**, evitando el filtrado de información del conjunto test.
+
+###  2. Gestión de Clases Desbalanceadas
+El conjunto de datos presenta un desbalance severo donde solo el **11.7%** de los clientes contrata el depósito. 
+* Se aplicó una partición **estratificada** (`stratify=y`) para mantener las proporciones exactas en todas las matrices.
+* Se configuró el tratamiento del desbalance de manera nativa en la raíz de los clasificadores: integrando parámetros como `class_weight='balanced'` en los algoritmos tradicionales y calculando el ratio de compensación exacto mediante `scale_pos_weight` en el ecosistema XGBoost.
+
+###  3. Estrategia de Evaluación y "Torneo de Baselines"
+Se descartó la exactitud (*accuracy*) al ser una métrica engañosa en problemas desbalanceados. El sistema de evaluación modular midió el rendimiento en función de tres indicadores clave de negocio:
+1. **Recall (Sensibilidad):** Capacidad de no dejar escapar clientes dispuestos a contratar (minimizar el coste de oportunidad).
+2. **Precision (Precisión):** Capacidad de acertar en la llamada para optimizar el tiempo del comercial (minimizar llamadas inútiles).
+3. **F1-Score y ROC-AUC:** Equilibrio general entre precisión y cobertura del modelo para ordenar y segmentar a la clientela.  
 
 ---
 
-# 7. Resultados del modelado
+# 7. Resultados del Modelado 
 
+### Fase 1: Comparativa de Modelos Base (*Baselines*)
+Se evaluaron 7 algoritmos de diversa naturaleza computacional (lineales, basados en distancias y ensamblados de última generación) bajo las mismas condiciones. A continuación, se muestran los resultados ordenados por la métrica principal (*F1-Score*):
+
+| Modelo | ROC-AUC | F1-Score (Clase 1) | Recall (Clase 1) | Precisión (Clase 1) | Decisión / Observaciones |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **CatBoost** | **0.8005** | **0.4642** | 0.6248 | 0.3693 |  **Seleccionado:** Mayor equilibrio y tratamiento nativo de categóricas. |
+| **SVM** | 0.7965 | 0.4626 | 0.6229 | 0.3680 |  Descartado por su alto coste computacional y lentitud en producción. |
+| **LightGBM** | 0.8012 | 0.4587 | **0.6437** | 0.3564 |  Alternativa si la estrategia comercial fuera 100% agresiva (máx. Recall). |
+| **XGBoost** | 0.7749 | 0.4284 | 0.5784 | 0.3402 | Rendimiento robusto, pero superado por CatBoost. |
+| **Random Forest** | 0.7878 | 0.4178 | 0.3809 | 0.4627 | Penaliza en exceso el Recall en beneficio de la precisión. |
+| **Regresión Logística** | 0.7740 | 0.3827 | 0.6408 | 0.2728 | Buen Recall gracias al enriquecimiento de clústeres, baja precisión. |
+| **KNN** | 0.6932 | 0.3046 | 0.2108 | **0.5493** | No apto para este nivel de desbalance al basarse en distancias simples. |
+
+### Fase 2: Optimización de Hiperparámetros (*GridSearchCV*)
+Tras seleccionar **CatBoost** por superar el umbral de 0.80 en ROC-AUC y liderar el *F1-Score*, se sometió a un ajuste fino con validación cruzada (`cv=3`) sobre los hiperparámetros de profundidad (`depth`), regularización L2 (`l2_leaf_reg`) y tasa de aprendizaje (`learning_rate`). 
+
+La evolución del modelo sobre la muestra de prueba final es la siguiente:
+
+| Métrica Clave | CatBoost Base | CatBoost Optimizado | Impacto Operativo |
+| :--- | :---: | :---: | :--- |
+| **ROC-AUC Score** | 0.8005 | **0.8038** | Mayor capacidad de discriminación en la ordenación del *score* del cliente. |
+| **F1-Score (Clase 1)** | 0.4642 | **0.4744** | Incremento general del +2.2% en la nota de equilibrio del clasificador. |
+| **Precisión (Clase 1)**| 0.3693 | **0.3856** | **Mejora del +4.4%.** Mayor asertividad comercial por cada llamada emitida. |
+| **Recall (Clase 1)** | 0.6248 | **0.6163** | Se consolida la captura de un **61.63% del mercado real de contrataciones**. |
 
 ---
 
-# 8. Conclusiones
+# 8. Conclusiones y Retorno de Negocio 
+
+El despliegue analítico realizado sobre el modelo **CatBoost Optimizado** arroja aprendizajes de negocio decisivos para el área de marketing y operaciones de la entidad bancaria:
+
+###  1. Triplicación de la Eficiencia del Call Center
+Históricamente, al realizar una campaña de telemarketing a ciegas o masiva, el banco lograba una tasa de éxito natural del **11.70%** (1 de cada 10 llamadas convertía). 
+* Gracias a la priorización del modelo optimizado, la **Precisión se eleva al 38.56%** (casi 4 de cada 10 contactos recomendados terminan en firma).
+* Esto se traduce directamente en un incremento operativo donde el equipo comercial **multiplica por tres su rentabilidad por hora trabajada**.
+
+###  2. Ahorro Directo en Costes de Fricción (Matriz de Confusión)
+Al evaluar el rendimiento sobre los 9,043 clientes del conjunto de prueba independiente, el clasificador demostró una altísima capacidad de filtrado financiero:
+* **6,946 llamadas innecesarias evitada** (*Verdaderos Negativos*): El modelo identificó con éxito a casi 7,000 personas que iban a rechazar la oferta, ahorrando semanas de trabajo comercial en vano.
+* **Captura de Oportunidad** (*Verdaderos Positivos*): El modelo permitió cerrar **652 ventas directas** realizando únicamente 1,691 llamadas totales.
+
+###  3. Apertura de la "Caja Negra" y Alineación con el EDA
+El análisis de importancia relativa de las variables (*Feature Importance*) validó la coherencia matemática y comercial del algoritmo:
+* **El perfil y momento financiero (`balance`, `age`):** Se confirman como los factores demográficos y económicos más determinantes para predecir la propensión, respaldando los hallazgos del análisis exploratorio inicial.
+* **La estacionalidad e histórico de contactos (`month`, `poutcome`):** El modelo no solo dicta *a quién* llamar, sino que confirma empíricamente que el mes de lanzamiento de la campaña es crucial para el cierre de operaciones.
+
+###  4. Viabilidad y Puesta en Producción
+El modelo final cumple con los más altos estándares de ingeniería de datos: sin sesgos de fuga temporal, preparado para absorber clases desbalanceadas e interpretado sin pérdida de generalización. El clasificador ha sido serializado en formato `.pkl` (`catboost_optimizado.pkl`), quedando listo para su integración en los flujos computacionales de la arquitectura de negocio actual del banco.
+
+---
 
 
 
@@ -421,8 +484,8 @@ Incluyen:
     — GitHub: https://github.com/MHHsim  
     — LinkedIn: https://www.linkedin.com/in/marta-harana-herrera-004a84117/
 
-- Maria Rodriguez 
-    — GitHub 
-    — LinkedIn  
+- Maria Rodríguez Esteras 
+    — GitHub: https://github.com/Mariasares
+    — LinkedIn: https://www.linkedin.com/in/mar%C3%ADa-rodes-8259403a1/  
 
 
