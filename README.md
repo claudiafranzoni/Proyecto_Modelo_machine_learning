@@ -7,11 +7,13 @@ El objetivo del proyecto es predecir qué clientes contratan el producto, para p
 ---
 
 ## Dataset utilizado
+
 - **Conjunto de datos:** Bank Marketing — UCI Machine Learning Repository  
 - **Registros:** 45.211 clientes  
 - **Variables:** 16 predictoras + objetivo (`y`: yes/no)  
-- **Enfoque:** híbrido → segmentación de clientes (no supervisado) + clasificación (supervisado)
+- **Enfoque:** híbrido → segmentación de clientes (no supervisado) + clasificación (supervisado)  
 - **Fuente oficial:** https://archive.ics.uci.edu/dataset/222/bank+marketing
+
 
 ---
 
@@ -37,54 +39,62 @@ El objetivo del proyecto es predecir qué clientes contratan el producto, para p
 - **Python 3.10+**
 - **pandas** y **numpy** — análisis y manipulación de datos
 - **scikit-learn** — modelos base, pipelines, métricas y validación cruzada
+
 - **Modelos de Gradient Boosting utilizados:**
-  - **XGBoost**
-  - **LightGBM**
-  - **CatBoost**
+  - XGBoost  
+  - LightGBM  
+  - CatBoost  
+
 - **Modelos clásicos utilizados en la experimentación:**
   - Logistic Regression  
   - K-Nearest Neighbors (KNN)  
   - Support Vector Machine (SVM)  
   - Decision Tree  
   - Random Forest  
-- **GridSearchCV** y **RandomizedSearchCV** — optimización de hiperparámetros
-- **Matplotlib** y **Seaborn** — visualización de resultados
-- **Jupyter Notebook** — desarrollo y análisis exploratorio
-- **Git + GitHub Desktop** — control de versiones
+
+- **GridSearchCV** y **RandomizedSearchCV** — optimización de hiperparámetros  
+- **Matplotlib** y **Seaborn** — visualización de resultados  
+- **Jupyter Notebook** — desarrollo y análisis exploratorio  
+- **Git + GitHub Desktop** — control de versiones  
 - **Visual Studio Code (VS Code)** — entorno de desarrollo
-
-
---- 
-
-## Instrucciones de reprodución
-
-Para ejecutar el proyecto y reproducir los resultados del modelo, sigue los pasos indicados a continuación:
-
-git clone https://github.com/claudiafranzoni/Proyecto_Modelo_machine_learning
-cd Proyecto_Modelo_machine_learning
-
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# macOS / Linux
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-jupyter notebook notebooks/main.ipynb
-
-# Cargar modelo final
-import joblib
-modelo = joblib.load("models/catboost_optimizado.pkl")
 
 ---
 
+##  Instrucciones de reproducción
 
-# Análisis Exploratorio y Segmentación de Clientes
+Para ejecutar el proyecto y reproducir los resultados del modelo, sigue los pasos indicados a continuación:
 
-## Contenido de esta parte
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/claudiafranzoni/Proyecto_Modelo_machine_learning
+cd Proyecto_Modelo_machine_learning
+
+# 2. Crear entorno virtual
+python -m venv venv
+
+# 3. Activar entorno virtual
+# Windows:
+venv\Scripts\activate
+# macOS / Linux:
+source venv/bin/activate
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
+
+# 5. Ejecutar notebook
+jupyter notebook notebooks/main.ipynb
+```
+
+## Cargar modelo final
+
+```python
+import joblib
+modelo = joblib.load("models/catboost_optimizado.pkl")
+```
+
+## Análisis Exploratorio y Segmentación de Clientes
+
+### Contenido de esta parte
 
 | Archivo | Descripción |
 |---|---|
@@ -93,7 +103,7 @@ modelo = joblib.load("models/catboost_optimizado.pkl")
 | `models/scaler_segmentacion.pkl` | Escalador ajustado sobre *train* para la segmentación. |
 | `models/kmeans_segmentacion.pkl` | Modelo de clustering (K-Means, k=4) entrenado. |
 
-## Cómo ejecutar
+### Cómo ejecutar
 
 ```bash
 pip install pandas numpy matplotlib seaborn scikit-learn joblib
@@ -103,13 +113,13 @@ pip install pandas numpy matplotlib seaborn scikit-learn joblib
 2. **Importante:** el separador del CSV es `;` → `pd.read_csv(ruta, sep=";")`.  
 3. Ejecuta los notebooks de arriba abajo. Ambos se ejecutan sin errores y generan sus figuras en línea.
 
-## Metodología
+### Metodología
 
 El **EDA descriptivo** se realiza sobre el conjunto de datos completo, para comprender su estructura.  
 La prevención de la **fuga de datos** (*data leakage*) se aplica en las fases que *ajustan parámetros*:  
 el preprocesado y la segmentación se ajustan **exclusivamente sobre el conjunto de entrenamiento** (partición estratificada 80/20, `random_state=42`).
 
-## Principales hallazgos del EDA
+### Principales hallazgos del EDA
 
 - **Variable objetivo desbalanceada:** solo el **11,7 %** de los clientes contactados contrata (88,3 % / 11,7 %).  
 - **Fuga de datos en `duration`:** es la variable más correlacionada con el objetivo, pero solo se conoce tras la llamada → **se excluye**.  
@@ -130,7 +140,7 @@ el preprocesado y la segmentación se ajustan **exclusivamente sobre el conjunto
 | Cardinalidad baja (≤ 12) | One-Hot Encoding | Preprocesado |
 | `poutcome`, mes, edad, situación crediticia | Conservar (alto valor predictivo) | Modelado |
 
-## Segmentación de clientes
+### Segmentación de clientes
 
 Se agrupa la cartera con **K-Means** para identificar perfiles accionables y aportar una variable adicional al clasificador.
 
@@ -155,9 +165,10 @@ Se agrupa la cartera con **K-Means** para identificar perfiles accionables y apo
 
 ---
 *Análisis realizado sobre el conjunto de entrenamiento (partición estratificada 80/20). El EDA describe sobre el conjunto completo; las transformaciones que ajustan parámetros se aplican solo sobre train.*
+
 ---
 
-# 3. Feature Engineering
+## Feature Engineering
 
 ### Eliminación de variables con fuga de información
 - `duration` se elimina completamente.  
@@ -184,7 +195,7 @@ Se agrupa la cartera con **K-Means** para identificar perfiles accionables y apo
 
 ---
 
-# 4. Preparación del modelado
+## Preparación del modelado
 
 ### Separación Train/Test
 Se realiza un **split estratificado** para preservar la proporción de clases.
@@ -196,7 +207,7 @@ Se realiza un **split estratificado** para preservar la proporción de clases.
 
 ---
 
-# 5. Pipelines para modelos
+## Pipelines para modelos
 
 Se construyen **3 pipelines independientes**, optimizados para cada familia de modelos:
 
@@ -228,7 +239,7 @@ Incluyen:
 
 ---
 
-# 6. Modelado
+## Modelado
 
 El objetivo de esta fase ha sido desarrollar un modelo de clasificación binaria supervisada capaz de estimar la probabilidad de que un cliente contrate un depósito a plazo (`y` ∈ {no, yes}). El propósito fundamental de negocio es **priorizar los contactos del *call center* antes de realizar la llamada**, optimizando los costes y aumentando el ratio de conversión.
 
@@ -251,7 +262,7 @@ Se descartó la exactitud (*accuracy*) al ser una métrica engañosa en problema
 
 ---
 
-# 7. Resultados del Modelado 
+## Resultados del Modelado 
 
 ### Fase 1: Comparativa de Modelos Base (*Baselines*)
 Se evaluaron 7 algoritmos de diversa naturaleza computacional (lineales, basados en distancias y ensamblados de última generación) bajo las mismas condiciones. A continuación, se muestran los resultados ordenados por la métrica principal (*F1-Score*):
@@ -280,7 +291,7 @@ La evolución del modelo sobre la muestra de prueba final es la siguiente:
 
 ---
 
-# 8. Conclusiones y Retorno de Negocio 
+## Conclusiones y Retorno de Negocio 
 
 El despliegue analítico realizado sobre el modelo **CatBoost Optimizado** arroja aprendizajes de negocio decisivos para el área de marketing y operaciones de la entidad bancaria:
 
@@ -304,13 +315,13 @@ El modelo final cumple con los más altos estándares de ingeniería de datos: s
 
 ---
 
-# 9. Evaluación del Umbral  
+## Evaluación del Umbral  
 
 ### Cómo adaptar el comportamiento del modelo CatBoost a los objetivos del negocio bancario
 
 En modelos de clasificación binaria, el umbral de decisión determina a partir de qué probabilidad consideramos que un cliente **sí contrataría** el producto. Aunque el valor por defecto suele ser **0.50**, en campañas bancarias este umbral tiene un impacto directo en el número de llamadas, los clientes captados y los recursos necesarios. Por eso, evaluar distintos umbrales permite ajustar el modelo a la estrategia comercial del banco.
 
-## Efecto de modificar el umbral
+### Efecto de modificar el umbral
 
 - **Umbral bajo (≈ 0.30)**  
   - El modelo se vuelve más agresivo.  
@@ -328,7 +339,7 @@ En modelos de clasificación binaria, el umbral de decisión determina a partir 
   - Permite equilibrar **tiempo, coste y clientes captados**.  
   - Útil cuando el número de agentes es limitado o la campaña debe ajustarse a un presupuesto concreto.
 
-## Conclusión general
+### Conclusión general
 
 A medida que subimos el umbral, el modelo exige mayor probabilidad para clasificar a un cliente como “sí”. Esto reduce llamadas innecesarias, pero también aumenta los clientes perdidos.  
 
