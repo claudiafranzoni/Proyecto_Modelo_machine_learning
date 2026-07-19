@@ -352,7 +352,7 @@ El ajuste del umbral convierte el modelo CatBoost en una herramienta flexible qu
 
 
 ## Autores
-- Claudia 
+- Claudia Franzoni Hernández
     — GitHub: https://github.com/claudiafranzoni
     — LinkedIn: https://www.linkedin.com/in/claudia-franzoni-800529196/
 
